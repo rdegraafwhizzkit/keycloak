@@ -1,0 +1,8 @@
+keycloak_base_url = 'https://your-keycloak-server-url'
+keycloak_username = 'admin'
+keycloak_password = 'admin-password'
+
+keycloak_realm = 'realm-name-to-be-created'
+keycloak_client_id = 'client-to-be-created'
+
+databricks_deployment = 'dbc-aa11bb22-1f2e'

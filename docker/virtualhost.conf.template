@@ -1,0 +1,11 @@
+<VirtualHost *:443>
+  ProxyPass / http://FIXME:8080/
+  ProxyPassReverse / http://FIXME:8080/
+  ServerName FIXME
+  SSLEngine on
+  SSLCertificateFile /etc/ssl/localcerts/FIXME/certificate.crt
+  SSLCertificateKeyFile /etc/ssl/localcerts/FIXME/certificate.key
+  SSLCertificateChainFile /etc/ssl/localcerts/FIXME/cabundle.crt
+  ProxyPreserveHost  On
+  RequestHeader set X-Forwarded-Proto https
+</VirtualHost>
