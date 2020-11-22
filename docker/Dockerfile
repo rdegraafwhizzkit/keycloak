@@ -35,7 +35,9 @@ RUN apt-get update -y && \
   openssl \
   tar \
   debianutils && \
-  apt-get clean
+  apt-get clean && \
+  ln -fs /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime && \
+  dpkg-reconfigure --frontend noninteractive tzdata
 
 RUN mkdir -p /opt/jboss && \
   cd /tmp && \
