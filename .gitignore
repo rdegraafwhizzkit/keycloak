@@ -2,3 +2,4 @@
 docker/virtualhost.conf
 *.local.*
 venv
+.DS_Store
