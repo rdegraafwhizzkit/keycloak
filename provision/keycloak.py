@@ -1,9 +1,14 @@
 import requests
 import json
 from pprint import pprint as pp
-from .config import *
+from dynaconf import Dynaconf
 
-databricks_base_url = f'https://{databricks_deployment}.cloud.databricks.com'
+s = Dynaconf(
+    environments=True,
+    settings_file='keycloak.yaml'
+)
+
+databricks_base_url = f'https://{s.databricks_deployment}.cloud.databricks.com'
 databricks_saml_url = f'{databricks_base_url}/saml/consume'
 
 
@@ -17,20 +22,20 @@ def parse_result(action: str, result):
 
 # Request a token
 token = json.loads(requests.post(
-    f'{keycloak_base_url}/auth/realms/master/protocol/openid-connect/token',
+    f'{s.keycloak_base_url}/auth/realms/master/protocol/openid-connect/token',
     data={
         'grant_type': 'password',
         'client_id': 'admin-cli',
-        'username': keycloak_username,
-        'password': keycloak_password
+        'username': s.keycloak_username,
+        'password': s.keycloak_password
     }
 ).text)['access_token']
 
 # Create realm
 api_result = requests.post(
-    f'{keycloak_base_url}/auth/admin/realms',
+    f'{s.keycloak_base_url}/auth/admin/realms',
     data=json.dumps({
-        'realm': keycloak_realm,
+        'realm': s.keycloak_realm,
         'enabled': True
     }),
     headers={
@@ -42,7 +47,7 @@ parse_result('Create realm', api_result)
 
 # Delete existing client if present
 api_result = requests.delete(
-    f'{keycloak_base_url}/auth/admin/realms/{keycloak_realm}/clients/{keycloak_client_id}',
+    f'{s.keycloak_base_url}/auth/admin/realms/{s.keycloak_realm}/clients/{s.keycloak_client_id}',
     headers={
         'Authorization': f'bearer {token}'
     }
@@ -51,9 +56,9 @@ parse_result('Delete client', api_result)
 
 # Create client
 api_result = requests.post(
-    f'{keycloak_base_url}/auth/admin/realms/{keycloak_realm}/clients',
+    f'{s.keycloak_base_url}/auth/admin/realms/{s.keycloak_realm}/clients',
     data=json.dumps({
-        'id': keycloak_client_id,
+        'id': s.keycloak_client_id,
         'baseUrl': databricks_base_url,
         'protocol': 'saml',
         'fullScopeAllowed': False,
@@ -77,7 +82,7 @@ api_result = requests.post(
 parse_result('Create client', api_result)
 
 certs = requests.get(
-    f'{keycloak_base_url}/auth/realms/{keycloak_realm}/protocol/openid-connect/certs',
+    f'{s.keycloak_base_url}/auth/realms/{s.keycloak_realm}/protocol/openid-connect/certs',
     headers={
         'Authorization': f'bearer {token}'
     }
@@ -85,6 +90,6 @@ certs = requests.get(
 
 # Print values to use when setting up Databricks SSO
 print(f'Databricks SAML URL: {databricks_saml_url}')
-print(f'Single Sign-On URL: {keycloak_base_url}/auth/realms/{keycloak_realm}/protocol/saml')
-print(f'Identity Provider Entity ID: {keycloak_client_id}')
+print(f'Single Sign-On URL: {s.keycloak_base_url}/auth/realms/{s.keycloak_realm}/protocol/saml')
+print(f'Identity Provider Entity ID: {s.keycloak_client_id}')
 print(f'x.509 Certificate: {certs["keys"][0]["x5c"][0]}')

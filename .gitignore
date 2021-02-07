@@ -1,3 +1,4 @@
 .idea
 docker/virtualhost.conf
-provision/config.py
+*.local.*
+venv
